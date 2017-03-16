@@ -1,7 +1,3 @@
-#ifndef NEOPIXEL_H
-#define NEOPIXEL_H
-
-
 #define PIXELS 24 // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using
@@ -50,13 +46,15 @@
 
 #include "FFT.h"
 
-struct pixel_struct
+
+typedef struct
 {
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
+}pixel_struct;
 
-};
+pixel_struct STRAND[PIXELS];
 
 inline void sendBit( int bitVal )
 {
@@ -127,8 +125,9 @@ inline void sendPixel( unsigned char r, unsigned char g , unsigned char b )  {
 
 }
 
-void show() {
-	//_delay_ms(1);
+
+void show() 
+{
 	_delay_us( (RES / 1000UL) + 1);				// Round up since the delay must be _at_least_ this long (too short might not work, too long not a problem)
 }
 
@@ -144,4 +143,129 @@ void showColor( unsigned char r , unsigned char g , unsigned char b ) {
 	
 }
 
-#endif
+inline void sendPixelStruct( pixel_struct pixel )  {
+
+	sendByte(pixel.g);          // Neopixel wants colors in green then red then blue order
+	sendByte(pixel.r);
+	sendByte(pixel.b);
+
+}
+
+void showColorStruct( pixel_struct pixel ) {
+	
+	cli();
+	for( int p=0; p<PIXELS; p++ ) {
+		sendPixelStruct( pixel );
+	}
+	sei();
+	show();
+	
+}
+
+void displayStrand()
+{
+	cli();
+	for( int p=0; p<PIXELS; p++ ) {
+		sendPixelStruct( STRAND[p] );
+	}
+	sei();
+	show();
+}
+
+void setStrand(pixel_struct pixel)
+{
+	int i = 0;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i].r = pixel.r;
+		STRAND[i].g = pixel.g;
+		STRAND[i].b = pixel.b;
+	}
+
+}
+
+void colorwipe()
+{
+	int i = 0;
+	pixel_struct next;
+
+	next.b = 0;
+	next.r = 0;
+	next.g = 0;
+	setStrand(next);
+
+	next.b = 100;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+
+	next.g = 0;
+	next.b = 17;
+	next.r = 44;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+	next.b = 0;
+	next.g = 0;
+	next.r = 100;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+	next.b = 0;
+	next.r = 100;
+	next.g = 100;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+	next.b = 0;
+	next.r = 0;
+	next.g = 100;
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+	next.b = 100;
+	next.g = 100;
+	next.r = 0;
+	
+	for(i = 0; i < PIXELS; i++)
+	{
+		STRAND[i] = next;
+		displayStrand();
+		_delay_ms(100);
+	}
+
+
+}
+
+void Map7Linear( int array[]) //adjust strands brightness according to 7 element array using linear interpolation.7
+{
+	STRAND[0].r = array[0];
+	STRAND[4].r = array[1];
+	STRAND[8].r = array[2];
+	STRAND[12].r = array[3];
+	STRAND[15].r = array[4];
+	STRAND[19].r = array[5];
+	STRAND[23].r = array[6];
+
+	
+}

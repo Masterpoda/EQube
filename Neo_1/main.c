@@ -1,32 +1,32 @@
 
 #include "NeoPixel.h"
-#include "FFT.h"
+#include <stdlib.h>
 
 int main()
 {
+	pixel_struct pixel;
+
+	pixel.r = 10;
+	pixel.g = 0;
+	pixel.b = 0;
+
 	ledsetup();
-	// use SBI/CBI
-	unsigned char r = 0, g = 0, b = 0;
+	int seven[7] = {1,5,3,2,6,0,4};
+	setStrand(pixel);
+	Map7Linear(seven);
 	while (1)
 	{
-		r = 0; g = 0; b = 0;
-		for(r = 0; r < 255; r++)
+		//colorwipe();
+
+		int k = 0;
+		for(k = 0; k < 7; k++)
 		{
-			showColor(r,g,b);
-			_delay_ms(1);
+			seven[k] = rand()%10;
 		}
-		r = 0; g = 0; b = 0;
-		for(g = 0; g < 255; g++)
-		{
-			showColor(r,g,b);
-			_delay_ms(1);
-		}
-		r = 0; g = 0; b = 0;
-		for(b = 0; b < 255; b++)
-		{
-			showColor(r,g,b);
-			_delay_ms(1);
-		}
+		Map7Linear(seven);
+		_delay_ms(500);
+		displayStrand();
+
 	}
 
 	return 0;
