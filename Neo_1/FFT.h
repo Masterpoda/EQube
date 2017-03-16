@@ -23,7 +23,6 @@ typedef struct{
 //a vector with 2 elements
 typedef struct{
 	complex v[2];
-	
 }vector_2;
 
 //a vector with 4 elements
@@ -35,20 +34,32 @@ typedef struct{
 //final transformed vector
 typedef struct{
 	complex d[8];
-	
 }X_k;
 
 
 /*********** Function Declarations *************/
 void Unitize(float y[]);
+
+//common matrix multiplications
 vector_2 multiplyF2(vector_2 z2);
 vector_2 multiplyD2(vector_2 triangle_2);
 vector_4 multiplyD4(vector_4 triangle_2);
+
+//populates vectors with permuted values
+void populate(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[]);
+
+//complex/vector math
 complex c_Add(complex c_1, complex c_2);
+vector_2 v_Add2(vector_2 v1, vector_2 v2);
+vector_4 v_Add4(vector_4 v1, vector_4 v2);
+vector_2 v_Sub2(vector_2 v1, vector_2 v2);
+vector_4 v_Sub4(vector_4 v1, vector_4 v2);
 complex c_Sub(complex c_1, complex c_2);
 complex c_Mult(complex c_1, complex c_2);
+
 float eval_Func(X_k d_vector, float point);
 X_k combine_final(vector_4 Square, vector_4 Diamond);
+
 
 /*********** Function Definitions *************/
 
@@ -122,9 +133,61 @@ vector_4 multiplyD4(vector_4 triangle_2)
 	return diamond;
 }
 
+//function used to simultaneously permute vector and 
+void populate(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[])
+{
+	// Setting real Part	// Setting imaginary part
+	//z1
+	z1->v[0].real = z[0]; z1->v[0].imaginary = 0;
+	z1->v[1].real = z[4]; z1->v[1].imaginary = 0;
+
+	//z2
+	z2->v[0].real = z[2]; z2->v[0].imaginary = 0;
+	z2->v[1].real = z[6]; z2->v[1].imaginary = 0;
+
+	//z3
+	z3->v[0].real = z[1]; z3->v[0].imaginary = 0;
+	z3->v[1].real = z[5]; z3->v[1].imaginary = 0;
+
+	//z4
+	z4->v[0].real = z[3]; z4->v[0].imaginary = 0;
+	z4->v[1].real = z[7]; z4->v[1].imaginary = 0;
+
+}
+
+vector_4 combine_two(vector_2 Square, vector_2 Diamond)
+{
+	vector_4 step_2;
+	vector_2 temp, temp2; //storing sum and difference in advance
+
+	temp = v_Add2(Diamond, Square);
+	temp2 = v_Sub2(Diamond, Square);
+
+	step_2.v[0] = temp.v[0];
+	step_2.v[1] = temp.v[1];
+	step_2.v[2] = temp2.v[0];
+	step_2.v[3] = temp2.v[1];
+
+	return step_2;
+}
+
 X_k combine_final(vector_4 Square, vector_4 Diamond)
 {
 	X_k transformed;
+	vector_4 temp, temp2;//storing sum and difference in advance
+
+	temp = v_Add4(Diamond, Square);
+	temp2 = v_Sub4(Diamond, Square);
+
+	transformed.d[0] = temp.v[0];
+	transformed.d[1] = temp.v[1];
+	transformed.d[2] = temp.v[2];
+	transformed.d[3] = temp.v[3];
+	transformed.d[4] = temp2.v[0];
+	transformed.d[5] = temp2.v[1];
+	transformed.d[6] = temp2.v[2];
+	transformed.d[7] = temp2.v[3];
+
 	
 	return transformed;
 }
@@ -139,6 +202,30 @@ complex c_Add(complex c_1, complex c_2)
 	return temp;
 }
 
+//add vectors, returns the result
+vector_2 v_Add2(vector_2 v1, vector_2 v2)
+{
+	vector_2 temp;
+
+	temp.v[0] = c_Add(v1.v[0], v2.v[0]);
+	temp.v[1] = c_Add(v1.v[1], v2.v[1]);
+
+	return temp;
+}
+
+vector_4 v_Add4(vector_4 v1, vector_4 v2)
+{
+	vector_4 temp;
+
+	temp.v[0] = c_Add(v1.v[0], v2.v[0]);
+	temp.v[1] = c_Add(v1.v[1], v2.v[1]);
+	temp.v[2] = c_Add(v1.v[2], v2.v[2]);
+	temp.v[3] = c_Add(v1.v[3], v2.v[3]);
+
+	return temp;
+
+}
+
 complex c_Sub(complex c_1, complex c_2)
 {
 	complex temp;
@@ -147,6 +234,29 @@ complex c_Sub(complex c_1, complex c_2)
 	
 	return temp;
 	
+}
+
+vector_2 v_Sub2(vector_2 v1, vector_2 v2)
+{
+	vector_2 temp;
+
+	temp.v[0] = c_Sub(v1.v[0], v2.v[0]);
+	temp.v[1] = c_Sub(v1.v[1], v2.v[1]);
+
+	return temp;
+}
+
+vector_4 v_Sub4(vector_4 v1, vector_4 v2)
+{
+	vector_4 temp;
+
+	temp.v[0] = c_Sub(v1.v[0], v2.v[0]);
+	temp.v[1] = c_Sub(v1.v[1], v2.v[1]);
+	temp.v[2] = c_Sub(v1.v[2], v2.v[2]);
+	temp.v[3] = c_Sub(v1.v[3], v2.v[3]);
+
+	return temp;
+
 }
 
 //function multiplies two complex numbers and returns the result
@@ -176,6 +286,33 @@ float eval_Func(X_k d_vector, float point)
 			final_value += d_vector.d[i].imaginary*sin(i*point);
 	}
 	return final_value;
+}
+
+//gets an X_k vector from an array of y values
+X_k evalX_k(float y[])
+{
+	X_k transformed;
+	Unitize(y);//unitizing values of y
+
+	vector_2 z1, z2, z3, z4; //vectors to hold permuted values
+
+	vector_4 z1_2, z2_2; //vectors holding second stage of values
+
+	populate(&z1, &z2, &z3, &z4, y); //check here for errors first, this is the only function that passes structs by reference
+
+
+	//Muliply all Z vectors by F2 (the whole reason the FFT exists is so we can do this instead of higher N values for FN)
+	z1 = multiplyF2(z1);
+	z2 = multiplyF2(z2);
+	z3 = multiplyF2(z3);
+	z4 = multiplyF2(z4);
+
+	z1_2 = combine_two(z1, multiplyD2(z2));
+	z2_2 = combine_two(z3, multiplyD2(z4));
+
+	transformed = combine_final(z1_2, multiplyD4(z2_2));
+
+	return transformed;
 }
 
 #endif

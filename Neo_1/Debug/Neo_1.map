@@ -82,10 +82,18 @@ Discarded input sections
  .text.Unitize  0x00000000       0x3c main.o
  .text.multiplyF2
                 0x00000000      0x114 main.o
- .text.combine_final
-                0x00000000        0xe main.o
+ .text.populate
+                0x00000000      0x10e main.o
  .text.c_Add    0x00000000       0xc6 main.o
+ .text.v_Add2   0x00000000      0x108 main.o
+ .text.v_Add4   0x00000000      0x1bc main.o
  .text.c_Sub    0x00000000       0xc6 main.o
+ .text.v_Sub2   0x00000000      0x108 main.o
+ .text.combine_two
+                0x00000000      0x1e2 main.o
+ .text.v_Sub4   0x00000000      0x1bc main.o
+ .text.combine_final
+                0x00000000      0x184 main.o
  .text.c_Mult   0x00000000      0x13a main.o
  .text.multiplyD2
                 0x00000000       0xd8 main.o
@@ -93,6 +101,7 @@ Discarded input sections
                 0x00000000      0x138 main.o
  .text.eval_Func
                 0x00000000      0x174 main.o
+ .text.evalX_k  0x00000000      0x414 main.o
  .text.show     0x00000000        0x8 main.o
  .text.showColor
                 0x00000000      0x134 main.o
@@ -747,42 +756,42 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0xa8
+.debug_aranges  0x00000000       0xe0
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0xa8 main.o
+                0x00000000       0xe0 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x1460
+.debug_info     0x00000000     0x1ba1
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x5f4 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/atmega328p/avr5/crtatmega328p.o
- .debug_info    0x000005f4      0xe6c main.o
+ .debug_info    0x000005f4     0x15ad main.o
 
-.debug_abbrev   0x00000000      0x977
+.debug_abbrev   0x00000000      0xa32
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x5a2 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/atmega328p/avr5/crtatmega328p.o
- .debug_abbrev  0x000005a2      0x3d5 main.o
+ .debug_abbrev  0x000005a2      0x490 main.o
 
-.debug_line     0x00000000      0x844
+.debug_line     0x00000000      0xa69
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x133 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/atmega328p/avr5/crtatmega328p.o
- .debug_line    0x00000133      0x711 main.o
+ .debug_line    0x00000133      0x936 main.o
 
-.debug_frame    0x00000000      0x394
+.debug_frame    0x00000000      0x63c
  *(.debug_frame)
- .debug_frame   0x00000000      0x394 main.o
+ .debug_frame   0x00000000      0x63c main.o
 
-.debug_str      0x00000000      0x535
+.debug_str      0x00000000      0x585
  *(.debug_str)
  .debug_str     0x00000000      0x208 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/atmega328p/avr5/crtatmega328p.o
- .debug_str     0x00000208      0x32d main.o
-                                0x366 (size before relaxing)
+ .debug_str     0x00000208      0x37d main.o
+                                0x3b6 (size before relaxing)
 
-.debug_loc      0x00000000     0x13d0
+.debug_loc      0x00000000     0x21f0
  *(.debug_loc)
- .debug_loc     0x00000000     0x13d0 main.o
+ .debug_loc     0x00000000     0x21f0 main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -802,9 +811,9 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0xc8
+.debug_ranges   0x00000000      0x160
  *(.debug_ranges)
- .debug_ranges  0x00000000       0xc8 main.o
+ .debug_ranges  0x00000000      0x160 main.o
 
 .debug_macro
  *(.debug_macro)
