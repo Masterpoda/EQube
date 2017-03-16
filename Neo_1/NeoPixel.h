@@ -259,13 +259,34 @@ void colorwipe()
 
 void Map7Linear( int array[]) //adjust strands brightness according to 7 element array using linear interpolation.7
 {
-	STRAND[0].r = array[0];
-	STRAND[4].r = array[1];
-	STRAND[8].r = array[2];
-	STRAND[12].r = array[3];
-	STRAND[15].r = array[4];
-	STRAND[19].r = array[5];
-	STRAND[23].r = array[6];
 
+	int i,j;
+	for(i = 0; i < 6; i++)//for each 
+	{
+		for(j = 0; j < 4; j++)//for each
+		{
+			STRAND[i*4 + j].r = array[i]*((float)(4-j)/4.0) + array[i+1]*((float)(j)/4.0);
+		}
+
+	}
+
+	STRAND[23].r = array[6];
 	
+}
+
+void Map7FFT(float y[])
+{
+	X_k transformedVector = evalX_k(y);
+	float temp;
+	int i = 0;
+	for(i = 0; i < 24; i++)
+	{
+		temp = eval_Func(transformedVector, i*(7.0/24.0));
+
+		if(temp > 0)
+			STRAND[i].r = (int)temp;
+		else
+			STRAND[i].r = 0;
+	}
+
 }

@@ -113,19 +113,26 @@ vector_4 multiplyD4(vector_4 triangle_2)
 {
 	vector_4 diamond;
 
+	complex d1;
+	d1.real = 1.0;
+	d1.imaginary = 0;
+
 	complex d2;
 	d2.real = 1.0/sqrt(2.0);
 	d2.imaginary = -1.0/sqrt(2.0);
 
 	complex d3;
-	d2.real = 0;
-	d2.imaginary = -1.0;
+	d3.real = 0;
+	d3.imaginary = -1.0;
 
 	complex d4;
-	d2.real = -1.0/sqrt(2.0);
-	d2.imaginary = -1.0/sqrt(2.0);
+	d4.real = -1.0/sqrt(2.0);
+	d4.imaginary = -1.0/sqrt(2.0);
 
-	diamond.v[0] = triangle_2.v[0];
+	//d1 - d4 values verified
+
+
+	diamond.v[0] = c_Mult(triangle_2.v[0], d1);
 	diamond.v[1] = c_Mult(triangle_2.v[1], d2);
 	diamond.v[2] = c_Mult(triangle_2.v[2], d3);
 	diamond.v[3] = c_Mult(triangle_2.v[3], d4);
@@ -161,7 +168,7 @@ vector_4 combine_two(vector_2 Square, vector_2 Diamond)
 	vector_2 temp, temp2; //storing sum and difference in advance
 
 	temp = v_Add2(Diamond, Square);
-	temp2 = v_Sub2(Diamond, Square);
+	temp2 = v_Sub2(Square, Diamond);
 
 	step_2.v[0] = temp.v[0];
 	step_2.v[1] = temp.v[1];
@@ -176,8 +183,8 @@ X_k combine_final(vector_4 Square, vector_4 Diamond)
 	X_k transformed;
 	vector_4 temp, temp2;//storing sum and difference in advance
 
-	temp = v_Add4(Diamond, Square);
-	temp2 = v_Sub4(Diamond, Square);
+	temp = v_Add4(Square, Diamond);
+	temp2 = v_Sub4(Square, Diamond);
 
 	transformed.d[0] = temp.v[0];
 	transformed.d[1] = temp.v[1];
@@ -275,15 +282,20 @@ float eval_Func(X_k d_vector, float point)
 {
 	float final_value = d_vector.d[0].real / 2; //getting constant value
 	
+	float Im, Re;
+
 	int i = 0;
 	//start at 1 since we already evaluated k=0
 	for(i = 1; i < 8; i++)
 	{
-		if(d_vector.d[i].real > 0.001)//cosine part
-			final_value += d_vector.d[i].real*cos(i*point);
+		Re = d_vector.d[i].real;		//assigning value to a variable means fewer structure accesses
+		Im = d_vector.d[i].imaginary;	//FFT will be a little faster
 
-		if(d_vector.d[i].imaginary > 0.001)//sine part
-			final_value += d_vector.d[i].imaginary*sin(i*point);
+		if(Re > 0.001 || Re < -0.001)//cosine part
+			final_value += Re*cos(i*point);
+
+		if(Im > 0.001 || Im < -0.001)//sine part
+			final_value += Im*sin(i*point);
 	}
 	return final_value;
 }
@@ -298,7 +310,11 @@ X_k evalX_k(float y[])
 
 	vector_4 z1_2, z2_2; //vectors holding second stage of values
 
-	populate(&z1, &z2, &z3, &z4, y); //check here for errors first, this is the only function that passes structs by reference
+	vector_2 diamond_z2, diamond_z4;
+
+	vector_4 diamond_4;
+
+	populate(&z1, &z2, &z3, &z4, y); 
 
 
 	//Muliply all Z vectors by F2 (the whole reason the FFT exists is so we can do this instead of higher N values for FN)
@@ -307,10 +323,17 @@ X_k evalX_k(float y[])
 	z3 = multiplyF2(z3);
 	z4 = multiplyF2(z4);
 
-	z1_2 = combine_two(z1, multiplyD2(z2));
-	z2_2 = combine_two(z3, multiplyD2(z4));
+	diamond_z2 = multiplyD2(z2);//obtaining 'Diamond' vectors
+	diamond_z4 = multiplyD2(z4);
 
-	transformed = combine_final(z1_2, multiplyD4(z2_2));
+	z1_2 = combine_two(z1, diamond_z2);
+	z2_2 = combine_two(z3, diamond_z4);
+
+	//verified up to here
+
+	diamond_4 = multiplyD4(z2_2);
+
+	transformed = combine_final(z1_2, diamond_4);
 
 	return transformed;
 }
