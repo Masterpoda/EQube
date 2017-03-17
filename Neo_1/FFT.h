@@ -2,6 +2,7 @@
 #define FFT_H
 
 #include <math.h>
+#include <limits.h>
 
 
 //Fast Fourier Transformation Functions
@@ -39,6 +40,8 @@ typedef struct{
 
 /*********** Function Declarations *************/
 void Unitize(float y[]);
+unsigned int reverse(unsigned int number);
+int populate(vector_2 z_vectors[], unsigned int size_N, float z[]);
 
 //common matrix multiplications
 vector_2 multiplyF2(vector_2 z2);
@@ -46,7 +49,7 @@ vector_2 multiplyD2(vector_2 triangle_2);
 vector_4 multiplyD4(vector_4 triangle_2);
 
 //populates vectors with permuted values
-void populate(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[]);
+void populate_8(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[]);
 
 //complex/vector math
 complex c_Add(complex c_1, complex c_2);
@@ -57,8 +60,8 @@ vector_4 v_Sub4(vector_4 v1, vector_4 v2);
 complex c_Sub(complex c_1, complex c_2);
 complex c_Mult(complex c_1, complex c_2);
 
-float eval_Func(X_k d_vector, float point);
-X_k combine_final(vector_4 Square, vector_4 Diamond);
+float eval_Func_8(X_k d_vector, float point);
+X_k combine_final_8(vector_4 Square, vector_4 Diamond);
 
 
 /*********** Function Definitions *************/
@@ -141,7 +144,7 @@ vector_4 multiplyD4(vector_4 triangle_2)
 }
 
 //function used to simultaneously permute vector and 
-void populate(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[])
+void populate_8(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[])
 {
 	// Setting real Part	// Setting imaginary part
 	//z1
@@ -160,6 +163,43 @@ void populate(vector_2 *z1, vector_2 *z2, vector_2 *z3, vector_2 *z4, float z[])
 	z4->v[0].real = z[3]; z4->v[0].imaginary = 0;
 	z4->v[1].real = z[7]; z4->v[1].imaginary = 0;
 
+}
+
+int populate(vector_2 z_vectors[], unsigned int size_N, float z[])//max size is UINT_MAX
+{
+	if(size_N % 2 != 0)
+	{
+		return 1; //return 1 if the array isnt a multiple of 2
+	}
+	int bitsize = log(size_N)/log(2); //how many bits to describe the vector
+
+	unsigned int i, j, index, shiftAmount = (sizeof(unsigned int)*8) - bitsize;
+	for(i = 0; i < size_N/2; i++)
+	{
+		for (j = 0; j < 2; j++)
+		{
+			index = reverse(i + j) >> shiftAmount; //which Z value goes in this
+			z_vectors[i].v[i+j].real = z[index];///size_N; //unitizing in place.
+			z_vectors[i].v[i+j].imaginary = 0;
+		}
+	}
+	return 0;
+}
+
+unsigned int reverse(unsigned int number)
+{
+	unsigned int r = number; // r will be reversed bits of v; first get LSB of v
+	unsigned int s = sizeof(number) * CHAR_BIT - 1; // extra shift needed at end
+
+	for (number >>= 1; number; number >>= 1)
+	{
+		r <<= 1;
+		r |= number & 1;
+		s--;
+	}
+	r <<= s; // shift when v's highest bits are zero
+
+	return r;
 }
 
 vector_4 combine_two(vector_2 Square, vector_2 Diamond)
@@ -278,7 +318,7 @@ complex c_Mult(complex c_1, complex c_2)
 }
 
 
-float eval_Func(X_k d_vector, float point)
+float eval_Func_8(X_k d_vector, float point)
 {
 	float final_value = d_vector.d[0].real / 2; //getting constant value
 	
@@ -300,7 +340,7 @@ float eval_Func(X_k d_vector, float point)
 	return final_value;
 }
 
-//gets an X_k vector from an array of y values
+//gets an X_k vector from an array of y values (assuming size is 8)
 X_k evalX_k(float y[])
 {
 	X_k transformed;
@@ -314,7 +354,7 @@ X_k evalX_k(float y[])
 
 	vector_4 diamond_4;
 
-	populate(&z1, &z2, &z3, &z4, y); 
+	populate_8(&z1, &z2, &z3, &z4, y); 
 
 
 	//Muliply all Z vectors by F2 (the whole reason the FFT exists is so we can do this instead of higher N values for FN)

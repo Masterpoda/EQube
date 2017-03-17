@@ -277,14 +277,27 @@ void Map7Linear( int array[]) //adjust strands brightness according to 7 element
 void Map7FFT(float y[])
 {
 	X_k transformedVector = evalX_k(y);
+
+	const float Filter_Factor = 50;
+
 	float temp;
 	int i = 0;
 	for(i = 0; i < 24; i++)
 	{
-		temp = eval_Func(transformedVector, i*(7.0/24.0));
+		temp = eval_Func_8(transformedVector, i*(7.0/24.0));
+
+		if(temp < Filter_Factor)
+		{
+			//temp = temp * pow(temp/Filter_Factor, 2);
+		}
 
 		if(temp > 0)
-			STRAND[i].r = (int)temp;
+		{
+			if(temp < 255)
+				STRAND[i].r = (int)temp;
+			else
+				STRAND[i].r = 255;
+		}
 		else
 			STRAND[i].r = 0;
 	}
