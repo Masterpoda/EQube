@@ -45,6 +45,7 @@ int populate(vector_2 z_vectors[], unsigned int size_N, float z[]);
 void Fourierize(vector_2 z_vectors[], unsigned int size_N);
 void multiplyDN(vector_2 z_vectors[], unsigned int N);
 void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vector_size);
+void Combine_SD(vector_2 z_vectors[], const unsigned int N, const unsigned int SD_Size);
 
 
 //common matrix multiplications
@@ -223,15 +224,30 @@ void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vect
 	}
 }
 
-void Combine_SD(vector_2 z_vectors[], unsigned int N, unsigned int SD_Size) //Combine square/diamond
+//z_vectors		=	Vector we are transforming
+//N				=	Size of vector
+//SD_Size		=	Number of elements in a square/diamond
+
+void Combine_SD(vector_2 z_vectors[], const unsigned int N, const unsigned int SD_Size) //Combine square/diamond
 {
-	int i,j;
+	int i,j,k;
+	vector_2 SD_vector[SD_Size/2]; //used for temporary storage of square
+				 // (# of elements in total vector)/(# of elements in S/D * # of S/D in a group)
 	for(i = 0; i < N/(SD_Size*2); i++)//for every square/diamond group
 	{
-		for(j = 0; j < SD_Size/2; j++)//for each square and diamond
+		//Grabbing square and putting it in SD_vector, computing first half of combination group
+		for(k = 0; k < SD_Size/2; k++)
 		{
-			
+			SD_vector[k] = z_vectors[i*SD_Size*2 + k];
+			z_vectors[i*SD_Size*2 + k] = v_Add2(z_vectors[i*SD_Size*2 + k], z_vectors[SD_Size*(2*i + 1) + k]);//add squares and diamonds
 		}
+
+		for(k = 0; k < SD_Size/2; k++)
+		{
+			z_vectors[SD_Size*(2*i + 1) + k] = v_Sub2(SD_vector[k], z_vectors[SD_Size*(2*i + 1) + k]);//Subtract diamonds from squares
+		}
+
+
 	}	
 }
 
@@ -427,4 +443,44 @@ X_k evalX_k(float y[])
 	return transformed;
 }
 
+
+void Compute_FFT(vector_2 z_vectors[], const unsigned int Size, float z[])
+{
+		populate(z_vectors, Size, z);
+		Fourierize(z_vectors, Size);
+		unsigned int i;
+		for(i = 2; i < Size; i *= 2)
+		{
+			multiplyDN_All(z_vectors, i, Size);
+			Combine_SD(z_vectors, Size, i);//this is the last function to be tested
+		}
+}
+
+float Eval_Func(vector_2 z_vectors[], const unsigned int Size, float point)
+{
+	int i;
+	float final_value = 0.0, Re, Im;
+	for(i = 0; i < Size/2; i++)
+	{
+		Re = z_vectors.v[0].real;		//assigning value to a variable means fewer structure accesses
+		Im = z_vectors.v[0].imaginary;	//FFT will be a little faster
+
+		if(Re > 0.001 || Re < -0.001)//cosine part
+			final_value += Re*cos(i*point);
+
+		if(Im > 0.001 || Im < -0.001)//sine part
+			final_value += Im*sin(i*point);
+
+		Re = z_vectors.v[1].real;		//assigning value to a variable means fewer structure accesses
+		Im = z_vectors.v[1].imaginary;	//FFT will be a little faster
+
+		if(Re > 0.001 || Re < -0.001)//cosine part
+			final_value += Re*cos((i+1)*point);
+
+		if(Im > 0.001 || Im < -0.001)//sine part
+			final_value += Im*sin((i+1)*point);
+	}
+
+	return final_value;
+}
 #endif
