@@ -42,6 +42,10 @@ typedef struct{
 void Unitize(float y[]);
 unsigned int reverse(unsigned int number);
 int populate(vector_2 z_vectors[], unsigned int size_N, float z[]);
+void Fourierize(vector_2 z_vectors[], unsigned int size_N);
+void multiplyDN(vector_2 z_vectors[], unsigned int N);
+void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vector_size);
+
 
 //common matrix multiplications
 vector_2 multiplyF2(vector_2 z2);
@@ -173,17 +177,62 @@ int populate(vector_2 z_vectors[], unsigned int size_N, float z[])//max size is 
 	}
 	int bitsize = log(size_N)/log(2); //how many bits to describe the vector
 
-	unsigned int i, j, index, shiftAmount = (sizeof(unsigned int)*8) - bitsize;
+	unsigned int i = 0, index = 0, shiftAmount = (sizeof(unsigned int)*8) - bitsize;
 	for(i = 0; i < size_N/2; i++)
 	{
-		for (j = 0; j < 2; j++)
-		{
-			index = reverse(i + j) >> shiftAmount; //which Z value goes in this
-			z_vectors[i].v[i+j].real = z[index];///size_N; //unitizing in place.
-			z_vectors[i].v[i+j].imaginary = 0;
-		}
+
+			index = reverse(i*2) >> shiftAmount; //which Z value goes in this
+			z_vectors[i].v[0].real = z[index];///size_N; //unitizing in place.
+			z_vectors[i].v[0].imaginary = 0;
+			
+			index = reverse(i*2+1) >> shiftAmount; //which Z value goes in this
+			z_vectors[i].v[1].real = z[index];///size_N; //unitizing in place.
+			z_vectors[i].v[1].imaginary = 0;
+		
 	}
 	return 0;
+}
+
+void Fourierize(vector_2 z_vectors[], unsigned int size_N)
+{
+	unsigned int i = 0;
+	for(i = 0; i < size_N/2; i++)
+	{
+		z_vectors[i] = multiplyF2(z_vectors[i]);
+	}
+}
+
+void multiplyDN(vector_2 z_vectors[], unsigned int N)
+{
+	unsigned int i;
+	complex temp;
+	for(i = 0; i < N; i++)
+	{
+		temp.real = cos(-1.0*i*M_PI/N);
+		temp.imaginary = sin(-1.0*i*M_PI/N);
+		z_vectors[(int)(i/2)].v[i%2] = c_Mult(temp, z_vectors[(int)(i/2)].v[i%2]);
+	}
+}
+
+void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vector_size)
+{
+	unsigned int i;
+	for(i = 0; i < (vector_size/(D_Size*2)); i++)
+	{
+		multiplyDN(&z_vectors[i*2 + 1], D_Size); //every other vector gets multiplied.
+	}
+}
+
+void Combine_SD(vector_2 z_vectors[], unsigned int N, unsigned int SD_Size) //Combine square/diamond
+{
+	int i,j;
+	for(i = 0; i < N/(SD_Size*2); i++)//for every square/diamond group
+	{
+		for(j = 0; j < SD_Size/2; j++)//for each square and diamond
+		{
+			
+		}
+	}	
 }
 
 unsigned int reverse(unsigned int number)

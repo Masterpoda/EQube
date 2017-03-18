@@ -30,6 +30,8 @@ int main()
 	float z[8] = {0,1,2,3,4,5,6,7};
 	unsigned int Size = 8;
 	populate(zs, Size, z);
+	Fourierize(zs, 8);
+	multiplyDN_All(zs,2,8);
 
 	unsigned int k = 1;
 	k = reverse(k);
