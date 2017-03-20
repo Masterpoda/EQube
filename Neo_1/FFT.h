@@ -230,24 +230,25 @@ void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vect
 
 void Combine_SD(vector_2 z_vectors[], const unsigned int N, const unsigned int SD_Size) //Combine square/diamond
 {
-	int i,j,k;
-	vector_2 SD_vector[SD_Size/2]; //used for temporary storage of square
+	int i,k, vector_unit = (SD_Size/2); //# of vectors in a square/triangle
+	vector_2 SD_vector[(SD_Size/2)*(N/(SD_Size*2))]; //used for temporary storage of squares
 				 // (# of elements in total vector)/(# of elements in S/D * # of S/D in a group)
 	for(i = 0; i < N/(SD_Size*2); i++)//for every square/diamond group
 	{
 		//Grabbing square and putting it in SD_vector, computing first half of combination group
-		for(k = 0; k < SD_Size/2; k++)
+		//for every vector in square
+		for(k = 0; k < vector_unit; k++)
 		{
-			SD_vector[k] = z_vectors[i*SD_Size*2 + k];
-			z_vectors[i*SD_Size*2 + k] = v_Add2(z_vectors[i*SD_Size*2 + k], z_vectors[SD_Size*(2*i + 1) + k]);//add squares and diamonds
+			SD_vector[k] = z_vectors[i*2*vector_unit + k]; //storing square value
+			z_vectors[i*(vector_unit+1) + k] = v_Add2(z_vectors[i*2*vector_unit + k], z_vectors[vector_unit*(i*2 + 1) + k]);//add squares and diamonds,store in square location
 		}
 
-		for(k = 0; k < SD_Size/2; k++)
+		for(k = 0; k < vector_unit; k++)
 		{
-			z_vectors[SD_Size*(2*i + 1) + k] = v_Sub2(SD_vector[k], z_vectors[SD_Size*(2*i + 1) + k]);//Subtract diamonds from squares
+			z_vectors[vector_unit*(i*2 + 1) + k] = v_Sub2(SD_vector[k], z_vectors[vector_unit*(i*2 + 1) + k]);//Subtract diamonds from squares
 		}
 
-
+		
 	}	
 }
 
@@ -454,6 +455,7 @@ void Compute_FFT(vector_2 z_vectors[], const unsigned int Size, float z[])
 			multiplyDN_All(z_vectors, i, Size);
 			Combine_SD(z_vectors, Size, i);//this is the last function to be tested
 		}
+
 }
 
 float Eval_Func(vector_2 z_vectors[], const unsigned int Size, float point)
@@ -462,8 +464,8 @@ float Eval_Func(vector_2 z_vectors[], const unsigned int Size, float point)
 	float final_value = 0.0, Re, Im;
 	for(i = 0; i < Size/2; i++)
 	{
-		Re = z_vectors.v[0].real;		//assigning value to a variable means fewer structure accesses
-		Im = z_vectors.v[0].imaginary;	//FFT will be a little faster
+		Re = z_vectors->v[0].real;		//assigning value to a variable means fewer structure accesses
+		Im = z_vectors->v[0].imaginary;	//FFT will be a little faster
 
 		if(Re > 0.001 || Re < -0.001)//cosine part
 			final_value += Re*cos(i*point);
@@ -471,8 +473,8 @@ float Eval_Func(vector_2 z_vectors[], const unsigned int Size, float point)
 		if(Im > 0.001 || Im < -0.001)//sine part
 			final_value += Im*sin(i*point);
 
-		Re = z_vectors.v[1].real;		//assigning value to a variable means fewer structure accesses
-		Im = z_vectors.v[1].imaginary;	//FFT will be a little faster
+		Re = z_vectors->v[1].real;		//assigning value to a variable means fewer structure accesses
+		Im = z_vectors->v[1].imaginary;	//FFT will be a little faster
 
 		if(Re > 0.001 || Re < -0.001)//cosine part
 			final_value += Re*cos((i+1)*point);
