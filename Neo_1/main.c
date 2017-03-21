@@ -31,12 +31,19 @@ int main()
 	unsigned int Size = 8;
 	populate(zs, Size, z);
 	Fourierize(zs, 8);
-	multiplyDN_All(zs,2,8);
+	//multiplyDN_All(zs,2,8);
+	
+	multiplyDN(&zs[1], 2);
+	
+	multiplyDN(&zs[3], 2);
+	
 	Combine_SD(zs,8,2);
 
 	//multiplyDN_All(zs,4,8);//problem
 
-	multiplyDN(&zs[4], 4);
+	multiplyDN(&zs[2], 4);
+
+	Combine_SD(zs,8,4);
 
 	unsigned int k = 1;
 	k = reverse(k);
