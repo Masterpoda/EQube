@@ -31,17 +31,15 @@ int main()
 	unsigned int Size = 8;
 	populate(zs, Size, z);
 	Fourierize(zs, 8);
-	//multiplyDN_All(zs,2,8);
+	multiplyDN_All(zs,8,2);
 	
-	multiplyDN(&zs[1], 2);
+	//multiplyDN(&zs[1], 2);
 	
-	multiplyDN(&zs[3], 2);
+	//multiplyDN(&zs[3], 2);
 	
 	Combine_SD(zs,8,2);
 
-	//multiplyDN_All(zs,4,8);//problem
-
-	multiplyDN(&zs[2], 4);
+	multiplyDN_All(zs,8,4);//problem
 
 	Combine_SD(zs,8,4);
 

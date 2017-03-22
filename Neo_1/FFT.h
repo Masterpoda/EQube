@@ -215,12 +215,13 @@ void multiplyDN(vector_2 z_vectors[], unsigned int N)
 	}
 }
 
-void multiplyDN_All(vector_2 z_vectors[], unsigned int D_Size, unsigned int vector_size)
+void multiplyDN_All(vector_2 z_vectors[], unsigned int N , unsigned int D_Size)
 {
 	unsigned int i;
-	for(i = 0; i < (vector_size/(D_Size*2)); i++)
+	//how many DN multiplications to do
+	for(i = 0; i < (N/(D_Size*2)); i++)
 	{
-		multiplyDN(&z_vectors[i*2 + 1], D_Size); //every other vector gets multiplied.
+		multiplyDN(&z_vectors[(i*D_Size + D_Size)/2], D_Size); //every other vector gets multiplied.
 	}
 }
 
