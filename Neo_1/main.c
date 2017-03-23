@@ -27,26 +27,17 @@ int main()
 	
 	vector_2 zs[4];
 
-	float z[8] = {0,1,2,3,4,5,6,7};
-	unsigned int Size = 8;
-	populate(zs, Size, z);
-	Fourierize(zs, 8);
-	multiplyDN_All(zs,8,2);
+	//float z[8] = {0,1,2,3,4,5,6,7};
+	const unsigned int Size = 8;
+	float z[8] = {0,0,0,255,0,0,0,0};
 	
-	//multiplyDN(&zs[1], 2);
+
+	Compute_FFT(zs,8,z);
 	
-	//multiplyDN(&zs[3], 2);
-	
-	Combine_SD(zs,8,2);
-
-	multiplyDN_All(zs,8,4);//problem
-
-	Combine_SD(zs,8,4);
-
-	unsigned int k = 1;
-	k = reverse(k);
-	z[0] = k;
+	float result = Eval_Func(zs, Size, 3.0);
 	displayStrand();
+	
+	
 	
 	unsigned int counter; //used for sinusoudal light pulsing
 	while (1)

@@ -453,8 +453,8 @@ void Compute_FFT(vector_2 z_vectors[], const unsigned int Size, float z[])
 		unsigned int i;
 		for(i = 2; i < Size; i *= 2)
 		{
-			multiplyDN_All(z_vectors, i, Size);
-			Combine_SD(z_vectors, Size, i);//this is the last function to be tested
+			multiplyDN_All(z_vectors, Size, i);
+			Combine_SD(z_vectors, Size, i);
 		}
 
 }
